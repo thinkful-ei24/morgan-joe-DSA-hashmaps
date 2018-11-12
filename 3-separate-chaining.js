@@ -4,6 +4,35 @@
 {key: x} -> {other_key: some other value}
 
 */
+class Node {
+  constructor(value) {
+    this.value = value;
+    this.next = null;
+  }
+}
+
+class LinkedList {
+  constructor() {
+    this.head = null;
+    this.tail = null;
+  }
+
+  append(value) {
+    const n = new Node(value);
+    // Special case: empty list
+    if (!this.head) {
+      this.head = n;
+      this.tail = n;
+    }
+    // Add to tail
+    else {
+      this.tail.next = n;
+      this.tail = n;
+    }
+    // Return `this` for chainability
+    return this;
+  }
+}
 
 class HashMap {
   constructor(initialCapacity = 8) {
@@ -24,25 +53,31 @@ class HashMap {
   }
 
   set(key, value) {
-    const loadRatio = (this.length + this._deleted + 1) / this._capacity;
-    if (loadRatio > HashMap.MAX_LOAD_RATIO) {
-      this._resize(this._capacity * HashMap.SIZE_RATIO);
-    }
+    // const loadRatio = (this.length + this._deleted + 1) / this._capacity;
+    // if (loadRatio > HashMap.MAX_LOAD_RATIO) {
+    //   console.log('resizing');
+    //   this._resize(this._capacity * HashMap.SIZE_RATIO);
+    // }
 
     const index = this._findSlot(key);
     // empty slot
     if (this._slots[index] === undefined) this._slots[index] = new LinkedList();
     // existing key
     const list = this._slots[index];
+    const item = findKey(list, key);
+    if(item) {
+       item.value = value;
+    } else {
     list.append({ key, value, deleted: false });
     this.length++;
+    }
   }
 
   remove(key) {
     const index = this._findSlot(key);
     const list = this._slots[index];
     const item = findKey(list, key);
-    if (slot === undefined) {
+    if (item === undefined) {
       throw new Error("Key error");
     }
     item.deleted = true;
@@ -75,6 +110,7 @@ class HashMap {
 
     for (const slot of oldSlots) {
       if (slot !== undefined && !slot.deleted) {
+        console.log('slotkey', slot.key, slot.value);
         this.set(slot.key, slot.value);
       }
     }
@@ -108,39 +144,11 @@ function main() {
   lor.set("HalfElven", "Arwen");
   lor.set("Ent", "Treebeard");
   // console.log(lor.get('Hobbit'));
-  console.log(lor.length);
+  console.log(lor.get('Hobbit'));
 }
 
-// main();
+main();
 
-class Node {
-  constructor(value) {
-    this.value = value;
-    this.next = null;
-  }
-}
-
-class LinkedList {
-  constructor() {
-    this.head = null;
-  }
-
-  append(value) {
-    const n = new Node(value);
-    // Special case: empty list
-    if (!this.head) this.head = n;
-    // Add to tail
-    else {
-      cursor = this.head;
-      while (cursor.next) {
-        cursor = cursor.next;
-      }
-      cursor.next = n;
-    }
-    // Return `this` for chainability
-    return this;
-  }
-}
 
 function findKey(list, key) {
   if (!list.head) return;
