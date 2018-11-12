@@ -8,9 +8,7 @@ function anagramGrouping(wordList) {
     //Loop through groupsArray and find the grouping(e.s aest)
     for (let i=0; i< array.length; i++) {
       if (array[i][0].split('').sort().join('') === grouping) {
-        //If first item in the array inside of 
-        //groupsArray is the same as the grouping
-        //argument, then return the index number of array
+        //return the index position of array
         return i;
       }
     }
