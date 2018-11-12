@@ -1,38 +1,4 @@
-/* 
- 0, 1, 2, 3, 4, 5
-[x, a, y, g, , z]
-{key: x} -> {other_key: some other value}
-
-*/
-class Node {
-  constructor(value) {
-    this.value = value;
-    this.next = null;
-  }
-}
-
-class LinkedList {
-  constructor() {
-    this.head = null;
-    this.tail = null;
-  }
-
-  append(value) {
-    const n = new Node(value);
-    // Special case: empty list
-    if (!this.head) {
-      this.head = n;
-      this.tail = n;
-    }
-    // Add to tail
-    else {
-      this.tail.next = n;
-      this.tail = n;
-    }
-    // Return `this` for chainability
-    return this;
-  }
-}
+const LinkedList = require("./LinkedList");
 
 class HashMap {
   constructor(initialCapacity = 8) {
@@ -45,7 +11,7 @@ class HashMap {
   get(key) {
     const index = this._findSlot(key);
     const list = this._slots[index];
-    const item = findKey(list, key);
+    const item = this._findKey(list, key);
     if (item === undefined) {
       return undefined;
     }
@@ -53,30 +19,30 @@ class HashMap {
   }
 
   set(key, value) {
-    // const loadRatio = (this.length + this._deleted + 1) / this._capacity;
-    // if (loadRatio > HashMap.MAX_LOAD_RATIO) {
-    //   console.log('resizing');
-    //   this._resize(this._capacity * HashMap.SIZE_RATIO);
-    // }
+    const loadRatio = (this.length + this._deleted + 1) / this._capacity;
+    if (loadRatio > HashMap.MAX_LOAD_RATIO) {
+      console.log("resizing");
+      this._resize(this._capacity * HashMap.SIZE_RATIO);
+    }
 
     const index = this._findSlot(key);
     // empty slot
     if (this._slots[index] === undefined) this._slots[index] = new LinkedList();
     // existing key
     const list = this._slots[index];
-    const item = findKey(list, key);
-    if(item) {
-       item.value = value;
+    const item = this._findKey(list, key);
+    if (item) {
+      item.value = value;
     } else {
-    list.append({ key, value, deleted: false });
-    this.length++;
+      list.append({ key, value, deleted: false });
+      this.length++;
     }
   }
 
   remove(key) {
     const index = this._findSlot(key);
     const list = this._slots[index];
-    const item = findKey(list, key);
+    const item = this._findKey(list, key);
     if (item === undefined) {
       throw new Error("Key error");
     }
@@ -90,28 +56,35 @@ class HashMap {
     const start = hash % this._capacity;
 
     return start;
+  }
 
-    // for (let i = start; i < start + this._capacity; i++) {
-    //   const index = i % this._capacity;
-    //   const slot = this._slots[index];
-    //   if (slot === undefined || (slot.key == key && !slot.deleted)) {
-    //     return index;
-    //   }
-    // }
+  _findKey(list, key) {
+    if (!list.head) return;
+
+    let cursor = list.head;
+    while (cursor) {
+      if (!cursor.value.deleted && cursor.value.key === key)
+        return cursor.value;
+      cursor = cursor.next;
+    }
   }
 
   _resize(size) {
-    const oldSlots = this._slots;
+    const oldTable = this._slots;
     this._capacity = size;
     // Reset the length - it will get rebuilt as you add the items back
     this.length = 0;
     this._deleted = 0;
     this._slots = [];
 
-    for (const slot of oldSlots) {
-      if (slot !== undefined && !slot.deleted) {
-        console.log('slotkey', slot.key, slot.value);
-        this.set(slot.key, slot.value);
+    for (const list of oldTable) {
+      if (list !== undefined) {
+        let head = list.head;
+        while (head) {
+          const item = list.shift();
+          this.set(item.key, item.value);
+          head = list.head;
+        }
       }
     }
   }
@@ -144,20 +117,9 @@ function main() {
   lor.set("HalfElven", "Arwen");
   lor.set("Ent", "Treebeard");
   // console.log(lor.get('Hobbit'));
-  console.log(lor.get('Hobbit'));
+  console.log(lor.get("Hobbit"));
 }
 
 main();
-
-
-function findKey(list, key) {
-  if (!list.head) return;
-
-  let cursor = list.head;
-  while (cursor) {
-    if (!cursor.value.deleted && cursor.value.key === key) return cursor.value;
-    cursor = cursor.next;
-  }
-}
 
 module.exports = HashMap;
