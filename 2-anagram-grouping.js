@@ -1,4 +1,4 @@
-const HashMap = require('./hashmapdrills');
+const HashMap = require("./hashmapdrills");
 
 function anagramGrouping(wordList) {
   const hashMap = new HashMap();
@@ -6,17 +6,25 @@ function anagramGrouping(wordList) {
 
   const groupIndexFinder = (array, grouping) => {
     //Loop through groupsArray and find the grouping(e.s aest)
-    for (let i=0; i< array.length; i++) {
-      if (array[i][0].split('').sort().join('') === grouping) {
+    for (let i = 0; i < array.length; i++) {
+      if (
+        array[i][0]
+          .split("")
+          .sort()
+          .join("") === grouping
+      ) {
         //return the index position of array
         return i;
       }
     }
-  }
+  };
 
-  for (let i=0; i < wordList.length; i++) {
-    const grouping = wordList[i].split('').sort().join('');
-    if(hashMap.get(grouping) === undefined) {
+  for (let i = 0; i < wordList.length; i++) {
+    const grouping = wordList[i]
+      .split("")
+      .sort()
+      .join("");
+    if (hashMap.get(grouping) === undefined) {
       groupsArray.push([wordList[i]]);
       hashMap.set(grouping, groupIndexFinder(groupsArray, grouping));
     } else {
@@ -28,7 +36,28 @@ function anagramGrouping(wordList) {
 }
 
 function main() {
-  console.log(anagramGrouping(['east', 'cars', 'acre', 'arcs', 'teas', 'eats', 'race']));
+  console.log(
+    anagramGrouping(["east", "cars", "acre", "arcs", "teas", "eats", "race"])
+  );
 }
 
 main();
+
+function anagramGroupingv2(wordList) {
+  const hashMap = new HashMap();
+  const result = [];
+  for (const word of wordlist) {
+    const sortedWord = word
+      .split("")
+      .sort()
+      .join("");
+    const group = hashMap.get(sortedWord);
+    if (group !== undefined) {
+      result[group].push(word);
+    } else {
+      result.push([word]);
+      hashMap.set(sortedWord, result.length - 1);
+    }
+  }
+  return result;
+}
